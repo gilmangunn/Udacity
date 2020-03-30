@@ -7,23 +7,27 @@ import {getAll} from "./BooksAPI";
 import {update} from "./BooksAPI";
 import {search} from "./BooksAPI";
 
+
+
 class App extends Component {
+
     state = {
         books: [],
         queryResults: []
     };
 
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {books: [], queryResults: []};
+        this.book = null;
 
     }
 
-    componentWillMount(){
+    componentWillMount() {
 
         getAll()
             .then((data) => {
-                    this.setState({books: data });
+                    this.setState({books: data});
                 }
             )
     };
@@ -38,21 +42,34 @@ class App extends Component {
     }
 
 
-    updateBook = (id, shelf)  => {
-        let kludge = new Object();
-        kludge.id = id;
-        console.log(kludge.id + " " + shelf);
-        update(kludge, shelf)
-            .then(
-                getAll()
-                    .then((data) => (
-                            this.setState({books: data })
-                        )
-                    )
-            )
-    }
+    updateBook = (book_id, shelf) => (
+        this.book = this.state.books.find(b => b.id === book_id),
+            this.book.shelf = shelf,
+            update(this.book, this.book.shelf).then(data => console.log(data)),
+            shelf === 'none'
+                ?
+                this.setState(prevState => ({books: prevState.books.filter(b => b.id !== book_id)}))
+                :
+                this.setState(prevState => ({books: prevState.books.filter(b => b.id !== book_id).concat(this.book)}))
+    )
 
-  render() {
+    updateBookSearch = (book_id, shelf) => (
+        this.book = this.state.queryResults.find(b => b.id === book_id),
+            this.book.shelf = shelf,
+            update(this.book, this.book.shelf).then(data => console.log(data)),
+            shelf === 'none'
+                ?
+                this.setState(prevState => ({books: prevState.books.filter(b => b.id !== book_id)}))
+                :
+                this.setState(prevState => ({books: prevState.books.filter(b => b.id !== book_id).concat(this.book)}))
+    )
+
+
+
+
+
+
+    render() {
     return(
         <div className="app">
             <Route exact path='/' render={() => (
@@ -85,7 +102,7 @@ class App extends Component {
                             <div className="list-books-content">
                             <input type="text"  onChange={(event) => this.updateQuery(event.target.value)}  placeholder="Search by title or author"/>
                             <div className="search-books-input-wrapper">
-                            <Bookshelf className="bookshelf" name="Search Results" move={this.updateBook}
+                            <Bookshelf className="bookshelf" name="Search Results" move={this.updateBookSearch}
                                        books={this.state.queryResults}/>
                             </div>
                         </div>
