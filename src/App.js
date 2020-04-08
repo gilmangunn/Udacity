@@ -20,7 +20,7 @@ class App extends Component {
         super(props);
         this.state = {books: [], queryResults: []};
         this.book = null;
-
+        this.temp = null;
     }
 
     componentWillMount() {
@@ -30,16 +30,34 @@ class App extends Component {
                     this.setState({books: data});
                 }
             )
+
     };
+
+    getShelf = (id) => {
+            return (this.state.books.find((b) => (id === b.id)) != undefined ? this.state.books.find((b) => (b.id === id)).shelf : 'none')
+    };
+
+    massageData = (d) => {
+        d != null &&
+        d.forEach((r) => r.shelf = this.getShelf(r.id));
+
+        console.log(d);
+        return (d != null && d.length > 0 && d != undefined)  ?
+            d
+            :
+            []
+    }
 
     updateQuery = (query) => {
         search(query, 20)
-            .then((data) => (
+            .then((data) => {
+                this.setState({queryResults: this.massageData(data)})
+    });
 
-                    (data != null && data.length > 0) ? this.setState({queryResults: data}) : this.setState({queryResults: []})
-                )
-            );
+
     }
+
+
 
 
     updateBook = (book_id, shelf) => (
@@ -62,12 +80,8 @@ class App extends Component {
                 this.setState(prevState => ({books: prevState.books.filter(b => b.id !== book_id)}))
                 :
                 this.setState(prevState => ({books: prevState.books.filter(b => b.id !== book_id).concat(this.book)}))
+
     )
-
-
-
-
-
 
     render() {
     return(
@@ -100,10 +114,15 @@ class App extends Component {
                         <Link className="close-search" to='/'>Close</Link>
 
                             <div className="list-books-content">
-                            <input type="text"  onChange={(event) => this.updateQuery(event.target.value)}  placeholder="Search by title or author"/>
+                            <input type="text"  onChange={(event) => this.updateQuery(event.target.value.trim())}  placeholder="Search by title or author"/>
                             <div className="search-books-input-wrapper">
-                            <Bookshelf className="bookshelf" name="Search Results" move={this.updateBookSearch}
-                                       books={this.state.queryResults}/>
+                            <Bookshelf
+                                className="bookshelf"
+                                name="Search Results"
+                                move={this.updateBookSearch}
+                                books={this.state.queryResults}/>
+
+
                             </div>
                         </div>
                     </div>

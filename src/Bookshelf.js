@@ -5,6 +5,8 @@ import Book from './Book'
 class Bookshelf extends Component {
 
 render(){
+
+
   return (
     <div>
 
@@ -13,7 +15,15 @@ render(){
         <ol className="books-grid">
           {this.props.books.map((book) => (
             <li key={book.id}>
-              <Book id={book.id} shelf={book.shelf} move={this.props.move} backgroundImage={book.imageLinks.thumbnail} title={book.title} authors={book.authors}/>
+              <Book id={book.id}
+                    shelf={book.shelf}
+                    move={this.props.move}
+                    backgroundImage={
+                        (typeof(book.imageLinks) === 'undefined' || book.imageLinks == null)
+                        ? "https://bit.ly/2UPFB3c"
+                        : book.imageLinks.thumbnail}
+                    title={book.title}
+                    authors={book.authors}/>
               </li>
         ))}
         </ol>
